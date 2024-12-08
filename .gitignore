@@ -1,0 +1,16 @@
+# Ignore the .git folder (this is usually managed automatically)
+.git/
+
+# Ignore virtual environment folder
+myenv/
+
+# Ignore dotenv files
+.env
+
+# Ignore Streamlit configuration and logs
+.streamlit/
+*.streamlit
+
+# Ignore log files
+*.log
+logs/
