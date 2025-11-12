@@ -1,23 +1,23 @@
 import streamlit as st
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter # Corrected import path
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_classic.chains.retrieval import create_retrieval_chain # FIX: Attempting import from core LangChain for retrieval chain
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
-import faiss # Although imported, this is only needed if you manually interact with faiss structure
+import faiss
 
 # Load environment variables from .env file (for API Key)
 load_dotenv()
 
 # --- Configuration ---
-# Fix 1: Update the embedding model to the fully qualified name (including 'models/') 
-# to resolve the "unexpected model name format" error (400).
 EMBEDDING_MODEL = "models/text-embedding-004" 
-LLM_MODEL = "gemini-2.5-pro" 
+# FIX: Switched to gemini-2.5-flash for much higher rate limits and faster response times.
+LLM_MODEL = "gemini-2.5-flash" 
+LLM_TIMEOUT = 300 
 
 # Streamlit app title
 st.title("Smart AI Chatbot with RAG")
@@ -60,7 +60,8 @@ def setup_retriever():
 def setup_llm():
     """Initialize the Language Model (LLM) for generating responses."""
     try:
-        return ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=0)
+        # Using the increased timeout value here
+        return ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=0, timeout=LLM_TIMEOUT)
     except Exception as e:
         st.error(f"Error initializing LLM: {e}")
         raise
@@ -71,7 +72,7 @@ def setup_prompt_template():
         "You are an assistant for question-answering tasks based on a provided document. "
         "Use the following retrieved context to answer the question. "
         "If the context does not contain the answer, say that you don't know based on the provided documents. "
-        "Keep the answer concise, limited to two or three sentences."
+        "Keep the answer consise."
         "\n\n"
         "Context: {context}"
     )
